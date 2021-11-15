@@ -22,10 +22,10 @@
             <div class="container dashboard-card tertiary">
                 <p>overall sentiment</p>
                 <h1>
-                    {% if faculty_overall_sentiment > 0 %}
+                    {% if faculty_overall_sentiment >= 3 %}
                     positive
-                    {% elif faculty_overall_sentiment < 0 %} negative {% elif faculty_overall_sentiment==0 %} neutral {%
-                        endif %} </h1>
+                    {% elif faculty_overall_sentiment < 2 %} negative {% elif faculty_overall_sentiment>=2 and
+                        faculty_overall_sentiment < 3 %} neutral {% endif %} </h1>
             </div>
         </div>
     </div>
@@ -55,18 +55,17 @@
             <td>
                 {% if faculty.sentiment == None %}
                 no feedbacks
-                {% elif faculty.sentiment < 0 %} <font style="color: red;">
+                {% elif faculty.sentiment < 2 %} <font style="color: red;">
                     negative
                     </font>
-                    {% elif faculty.sentiment > 0 %}
+                    {% elif faculty.sentiment >= 3 %}
                     <font style="color: rgb(4, 136, 4);">
                         positive
                     </font>
-                    {% elif faculty.sentiment == 0 %}
-                    <font style="color: #F6BE00;">
+                    {% elif faculty.sentiment >=2 and faculty.sentiment < 3 %} <font style="color: #F6BE00;">
                         negative
-                    </font>
-                    {% endif %}
+                        </font>
+                        {% endif %}
 
             </td>
             <td>
@@ -89,10 +88,10 @@
             <div class="container dashboard-card secondary">
                 <p>overall sentiment</p>
                 <h1>
-                    {% if faculty_overall_sentiment > 0.5 %}
+                    {% if faculty_overall_sentiment >= 3 %}
                     positive
-                    {% elif faculty_overall_sentiment == 0 %} negative {% elif faculty_overall_sentiment>0 and
-                    faculty_overall_sentiment < 0.5 %} neutral {% endif %} </h1>
+                    {% elif faculty_overall_sentiment < 2 %} negative {% elif faculty_overall_sentiment>=2 and
+                        faculty_overall_sentiment < 3 %} neutral {% endif %} </h1>
             </div>
         </div>
 
@@ -113,15 +112,15 @@
     <h3>Feedbacks</h3>
     {% for feedback in faculty_feedbacks %}
     <div class="feedback">
-        {% if feedback.sentiment < 0 %} <p class="sentiment" style="color: red; font-weight: bold;">negative</p>
-            {% elif feedback.sentiment > 0 %}
+        {% if feedback.sentiment < 2 %} <p class="sentiment" style="color: red; font-weight: bold;">negative</p>
+            {% elif feedback.sentiment >= 3 %}
             <p class="sentiment" style="color: green; font-weight: bold;">positive</p>
-            {% elif feedback.sentiment == 0 %}
-            <p class="sentiment" style="color: #F6BE00; font-weight: bold;">negative</p>
-            {% endif %}
-            <br>
-            <p>{{feedback.punctuality}}.{{feedback.teaching_style}}.{{feedback.portion_completion}}.{{feedback.doubt_solving}}.{{feedback.teacher_preparedness}}.{{feedback.additional_comments}}.
-            </p>
+            {% elif feedback.sentiment >=2 and feedback.sentiment < 3 %} <p class="sentiment"
+                style="color: #F6BE00; font-weight: bold;">neutral</p>
+                {% endif %}
+                <br>
+                <p>{{feedback.punctuality}}.{{feedback.teaching_style}}.{{feedback.portion_completion}}.{{feedback.doubt_solving}}.{{feedback.teacher_preparedness}}.{{feedback.additional_comments}}.
+                </p>
     </div>
     {% endfor %}
 </div>

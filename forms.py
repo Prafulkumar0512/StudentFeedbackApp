@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, SelectField, TextAreaField
 from wtforms.validators import DataRequired, Email, ValidationError
-from models import User
+from models import Users
 from textblob import TextBlob
 import joblib
 
@@ -23,7 +23,7 @@ class RegisterForm(FlaskForm):
             email_domain = read_email.split("@")[1]
         except Exception as e:
             print(str(e))
-        user = User.query.filter_by(email=email.data).first()
+        user = Users.query.filter_by(email=email.data).first()
         if user:
             raise ValidationError("a user with that email already exists!")
 

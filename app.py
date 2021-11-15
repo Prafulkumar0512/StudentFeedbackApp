@@ -6,7 +6,7 @@ from forms import (
     SelectionForm,
     StudentForm,
 )
-from models import Faculty, Feedback, Student, User
+from models import Faculty, Feedback, Student, Users
 from flask import Flask, flash, redirect, render_template, request, url_for
 from flask_login import LoginManager, current_user, login_required, login_user
 from flask_login.utils import logout_user
@@ -39,7 +39,7 @@ migrate.init_app(app, db)
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    return Users.query.get(int(user_id))
 
 
 # Custom Flask-CLI Commands
@@ -48,7 +48,7 @@ def load_user(user_id):
 @app.cli.command("add-admin")
 def add_admin():
     try:
-        admin = User(
+        admin = Users(
             role=0,
             email="admin@studentfeedback.in",
             private_id="admin",
@@ -77,7 +77,7 @@ def login():
 
     form = LoginForm()
 
-    user = User.query.filter_by(email=form.email.data).first()
+    user = Users.query.filter_by(email=form.email.data).first()
 
     if request.method == "POST" and form.validate():
         if user and user.password == form.password.data:
@@ -104,7 +104,7 @@ def signup():
         elif domain == "mes.ac.in":
             role = 1
 
-        user = User(
+        user = Users(
             email=form.email.data,
             private_id=secrets.token_hex(4),
             password=secrets.token_hex(5),
@@ -114,7 +114,7 @@ def signup():
         db.session.add(user)
         db.session.commit()
 
-        new_user = User.query.filter_by(email=form.email.data).first()
+        new_user = Users.query.filter_by(email=form.email.data).first()
         flash(
             f"almost done! please fill in the following details.",
             category="success",
@@ -129,7 +129,7 @@ def signup():
 
 @app.route("/auth/additional/<id>", methods=["GET", "POST"])
 def additional(id):
-    user = User.query.filter_by(id=id).first()
+    user = Users.query.filter_by(id=id).first()
 
     faculty_form = FacultyForm()
     student_form = StudentForm()
@@ -183,7 +183,7 @@ def dashboard():
         feedback_count = len(Feedback.query.all())
         faculty_overall_sentiment = float()
         faculties = list()
-        users = User.query.filter_by(role=1).all()
+        users = Users.query.filter_by(role=1).all()
         for user in users:
             faculty = Faculty.query.filter_by(user_id=user.id).first()
             faculties.append(faculty)
@@ -193,12 +193,12 @@ def dashboard():
         neutral = 0
 
         for f in feeds:
-            if f.sentiment > 0:
+            if f.sentiment >= 3:
                 pos += 1
-            # elif f.sentiment < 0:
-            #     neg += 1
-            elif f.sentiment == 0:
+            elif f.sentiment < 2:
                 neg += 1
+            elif f.sentiment >= 2 and f.sentiment < 3:
+                neutral += 1
 
         # pos = (pos / feedback_count) * 100
         # neg = (neg / feedback_count) * 100
@@ -239,12 +239,12 @@ def dashboard():
         neutral = 0
 
         for f in faculty_feedbacks:
-            if f.sentiment > 0:
+            if f.sentiment >= 3:
                 pos += 1
-            # elif f.sentiment < 0:
-            #     neg += 1
-            elif f.sentiment == 0:
+            elif f.sentiment < 2:
                 neg += 1
+            elif f.sentiment >= 2 and f.sentiment < 3:
+                neutral += 1
 
         #         faculty_overall_sentiment = float()
         #         faculty_sentiment = 0
@@ -266,6 +266,8 @@ def dashboard():
             pos=pos,
             neg=neg,
             neutral=neutral,
+            name=faculty.name,
+            branch=faculty.branch
         )
     elif current_user.role == 2:
         selectform = SelectionForm()
@@ -275,7 +277,7 @@ def dashboard():
         return render_template(
             "dashboard.html",
             current_user=current_user,
-            sform=selectform,
+            sform=selectform
         )
 
 # admin-teacher feedback visibility
@@ -298,12 +300,12 @@ def viewdetails(id):
     neutral = 0
 
     for f in faculty_feedbacks:
-        if f.sentiment > 0:
+        if f.sentiment >= 3:
             pos += 1
-            # elif f.sentiment < 0:
-            #     neg += 1
-        elif f.sentiment == 0:
+        elif f.sentiment < 2:
             neg += 1
+        elif f.sentiment >= 2 and f.sentiment < 3:
+            neutral += 1
 
     return render_template(
         "staffdetails.html",
@@ -314,6 +316,8 @@ def viewdetails(id):
         pos=pos,
         neg=neg,
         neutral=neutral,
+        name=faculty.name,
+        branch=faculty.branch
     )
 
 
